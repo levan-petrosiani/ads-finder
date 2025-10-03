@@ -1,0 +1,8 @@
+[database]
+host = localhost
+user = your_mysql_user
+password = your_mysql_password
+database = dejavu
+
+# Optional: If your MySQL server runs on a different port
+# port = 3306
