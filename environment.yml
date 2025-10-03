@@ -1,4 +1,4 @@
-name: dejavu-env
+name: ads-finder-env
 channels:
   - defaults
   - conda-forge
