@@ -20,11 +20,11 @@ def cross_correlation(x, y):
         corr = np.correlate(x, y, mode='full')
     return corr
 
-def find_matches(long_audio, ad_audio, sr, threshold=0.65):
+def find_matches(long_audio, ad_audio, sr, threshold=0.55):
     """Find matches using cross-correlation with chunking."""
     ad_len = len(ad_audio)
-    chunk_size = sr * 8  # 8-second chunks
-    chunk_overlap = sr * 4  # 4-second overlap
+    chunk_size = sr * 12  # 12-second chunks
+    chunk_overlap = sr * 6  # 6-second overlap
     matches = []
 
     for start in range(0, len(long_audio) - ad_len, chunk_size - chunk_overlap):
@@ -36,14 +36,13 @@ def find_matches(long_audio, ad_audio, sr, threshold=0.65):
         norm_factor = np.sqrt(np.sum(chunk**2) * np.sum(ad_audio**2))
         if norm_factor > 0:
             corr = corr / norm_factor
-        # Dynamic threshold based on local signal energy
-        local_threshold = max(threshold, 0.5 * np.max(corr))
-        peaks = np.where(corr > local_threshold)[0]
+        # Find peaks above threshold
+        peaks = np.where(corr > threshold)[0]
         for peak in peaks:
             match_time = (start + peak) / sr
             matches.append(match_time)
     
-    # Cluster matches within ad duration, report median time
+    # Cluster matches within ad duration, report start time
     ad_duration = ad_len / sr
     if not matches:
         return []
@@ -54,12 +53,15 @@ def find_matches(long_audio, ad_audio, sr, threshold=0.65):
         if t - current_cluster[-1] <= ad_duration:
             current_cluster.append(t)
         else:
-            if len(current_cluster) >= 3:  # Require at least 3 hits
-                clusters.append(np.median(current_cluster))  # Use median time
+            if len(current_cluster) >= 2:  # Require at least 2 hits
+                # Subtract ad duration to report start time
+                clusters.append(min(current_cluster) - ad_duration)
             current_cluster = [t]
-    if len(current_cluster) >= 3:
-        clusters.append(np.median(current_cluster))
+    if len(current_cluster) >= 2:
+        clusters.append(min(current_cluster) - ad_duration)
     
+    # Filter out negative times and round
+    clusters = [t for t in clusters if t >= 0]
     return np.unique(np.round(clusters, 2))
 
 start_time = time.perf_counter()
@@ -85,7 +87,7 @@ norm_time = time.perf_counter()
 print(f"Normalization: {norm_time - load_time:.2f} seconds")
 
 # Find matches
-matches = find_matches(long_audio, ad_audio, sr, threshold=0.65)
+matches = find_matches(long_audio, ad_audio, sr, threshold=0.55)
 match_time = time.perf_counter()
 print(f"Correlation and matching: {match_time - norm_time:.2f} seconds")
 
