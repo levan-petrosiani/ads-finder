@@ -1,11 +1,6 @@
 wav_files/
-mp3_files/
-
 .wav_files/
-.mp3_files/
-
 wav_files
-mp3_files
 
 __pycache__
 
