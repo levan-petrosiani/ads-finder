@@ -20,12 +20,8 @@ def run_matching(long_path, ad_path, threshold=0.55):
 
 
 if __name__ == "__main__":
-    LONG_AUDIO = "wav_files/chunk_22k_mono.wav"
-    # AD_AUDIO = ["wav_files/sandoni_ad.wav", #0
-    #             "wav_files/fino_ad.wav", #1
-    #             "wav_files/ad_clip_22k_mono.wav", #2
-    #             "wav_files/ninja_ad.wav" #3
-    # ]
+    LONG_AUDIO = "mp3_files/chunk.mp3"
+
     AD_AUDIO = ["mp3_files/presidenti_ad.mp3",
                 "mp3_files/sandoni_ad.mp3",
                 "mp3_files/ninja_ad.mp3",
