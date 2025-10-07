@@ -10,3 +10,5 @@ mp3_files
 __pycache__
 
 test_db.py 
+ads-finder/test_db.py
+./test_db
