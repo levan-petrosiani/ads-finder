@@ -3,8 +3,8 @@ from mysql.connector import errorcode
 
 config = {
     'user': 'root',
-    'password': '232018', # <-- IMPORTANT: Use your password here
-    'host': '127.0.0.1',         # Use 127.0.0.1 instead of localhost
+    'password': '232018',
+    'host': '127.0.0.1',   
     'database': 'dejavu',
     'port': 3306
 }
