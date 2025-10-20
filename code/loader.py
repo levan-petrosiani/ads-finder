@@ -2,6 +2,7 @@ import os
 import numpy as np
 from scipy.io.wavfile import read
 from pydub import AudioSegment
+import io
 
 
 def normalize_audio(audio: np.ndarray) -> np.ndarray:
@@ -38,13 +39,23 @@ def load_audio(path: str, sample_rate: int = 22050) -> tuple[int, np.ndarray]:
     return sr, normalize_audio(audio)
 
 
+def load_audio_in_memory(path: str, sample_rate: int = 22050) -> tuple[int, np.ndarray]:
+    """
+    Load and process audio file in memory without saving to disk.
+    Handles MP3 or other formats, converts to mono at given sample rate, normalizes.
+    Returns (sample_rate, normalized_audio).
+    """
+    try:
+        audio = AudioSegment.from_file(path)
+        audio_mono = audio.set_channels(1).set_frame_rate(sample_rate)
 
-def process_audio(input_mp3: str, temp_wav: str = "output.wav", sample_rate: int = 22050):
-    """
-    Full pipeline:
-    1. Convert MP3 to mono WAV (22kHz by default).
-    2. Load and normalize audio.
-    """
-    wav_path = convert_to_wav(input_mp3, temp_wav, sample_rate)
-    sr, audio = load_audio(wav_path)
-    return sr, audio
+        buffer = io.BytesIO()
+        audio_mono.export(buffer, format="wav")
+        buffer.seek(0)
+
+        sr, audio_data = read(buffer)
+        normalized_audio = normalize_audio(audio_data)
+        return sr, normalized_audio
+    except Exception as e:
+        # Re-raise the exception to be handled by the caller
+        raise Exception(f"Failed to process audio file {path}: {e}")

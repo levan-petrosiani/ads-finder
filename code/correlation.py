@@ -14,7 +14,10 @@ def cross_correlation(x, y):
         x = cp.array(x)
         y = cp.array(y)
         corr = cp.correlate(x, y, mode="full")
-        return cp.asnumpy(corr)
+        result = cp.asnumpy(corr)
+        # Explicitly free GPU memory
+        cp.get_default_memory_pool().free_all_blocks()
+        return result
     else:
         return np.correlate(x, y, mode="full")
 
@@ -48,4 +51,22 @@ def find_matches(long_audio, ad_audio, sr, threshold=0.55):
     # Adjust for ad duration
     ad_duration = len(ad_audio) / sr
     adjusted_matches = [t - ad_duration for t in matches if t - ad_duration >= 0]
-    return np.unique(np.round(adjusted_matches, 2))
+
+    # Deduplicate matches within a small time window (e.g., 0.1 seconds)
+    if adjusted_matches:
+        adjusted_matches = np.sort(adjusted_matches)
+        deduplicated_matches = []
+        tolerance = 0.1  # Merge matches within 0.1 seconds
+        current_match = adjusted_matches[0]
+        deduplicated_matches.append(current_match)
+
+        for t in adjusted_matches[1:]:
+            if t - current_match > tolerance:
+                deduplicated_matches.append(t)
+                current_match = t
+
+        adjusted_matches = np.round(deduplicated_matches, 2)
+    else:
+        adjusted_matches = np.array([])
+
+    return np.unique(adjusted_matches)
