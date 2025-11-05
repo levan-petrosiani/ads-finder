@@ -1,4 +1,3 @@
-# correlation.py
 import numpy as np
 
 # GPU acceleration if available
