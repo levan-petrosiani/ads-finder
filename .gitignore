@@ -1,7 +1,12 @@
 wav_files/
 .wav_files/
 wav_files
-
+Subwaves
+.Subwaves
+Subwaves/
+1TVb
+1TVb/
+.vscode
 __pycache__
 
 test_db.py 
